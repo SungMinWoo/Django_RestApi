@@ -4,6 +4,8 @@ from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
 
+from api.authentication import TokenAuthentication
+
 from .permissions import IsStaffEditorPermission
 from .models import Product
 from .serializers import ProductSerializers
@@ -13,8 +15,11 @@ class ProductListCreateAPIView(generics.ListCreateAPIView): # 리스트를 보�
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
 
-    authentication_classes = [authentication.SessionAuthentication, authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    # authentication_classes = [ # settings.py 에 명시해두어 필요없음
+    #     authentication.SessionAuthentication,
+    #     TokenAuthentication,
+    # ]
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # 이 부분은 인증 권한이 필요한 view에 다 넣어야함
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -28,6 +33,7 @@ class ProductListCreateAPIView(generics.ListCreateAPIView): # 리스트를 보�
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
     # lookup_field = 'pk' # 원하는 필드를 설정하는 곳
 
 
@@ -35,6 +41,7 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_update(self, serializer):
         instance = serializer.save()
@@ -45,10 +52,12 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
 #     queryset = Product.objects.all()
 #     serializer_class = ProductSerializers
 
+
 class ProductDestroyAPIView(generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
@@ -59,6 +68,7 @@ class ProductMixinView(mixins.CreateModelMixin, mixins.ListModelMixin, # 혼합 
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def get(self, request, *args, **kwargs): # get 메소드일때
         # print(args, kwargs) ## () {'pk': 10}

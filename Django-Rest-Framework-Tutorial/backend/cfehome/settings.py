@@ -125,3 +125,22 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# auth_classes = [
+#     'rest_framework.authentication.SessionAuthentication', # 패키지.모듈.클래스
+#     'api_authentication.TokenAuthentication'
+# ]
+# if DEBUG:
+#     auth_classes = [
+#         'api_authentication.TokenAuthentication'
+#     ] ## DEBUG 모드일 때 아래 DEFAULT_AUTHENTICATION_CLASSES에 auth_classes를 넣어도됨
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication', # 패키지.모듈.클래스
+        'api.authentication.TokenAuthentication' # custom authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticateOrReadOnly' # GET 요청 모든 유저
+    ]
+}
