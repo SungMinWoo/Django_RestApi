@@ -141,6 +141,6 @@ REST_FRAMEWORK = {
         'api.authentication.TokenAuthentication' # custom authentication
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticateOrReadOnly' # GET 요청 모든 유저
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly' # GET 요청 모든 유저
     ]
 }
