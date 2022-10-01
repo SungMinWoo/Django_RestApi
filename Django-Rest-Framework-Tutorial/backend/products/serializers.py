@@ -12,31 +12,32 @@ class ProductSerializers(serializers.ModelSerializer):
         view_name='product-detail',
         lookup_field='pk',
     )
-    email = serializers.EmailField(write_only=True) # write_only를 안하면 email필드가 없어서 에러남
+    # email = serializers.EmailField(write_only=True) # write_only를 안하면 email필드가 없어서 에러남
     title = serializers.CharField(validators=[validate_title_no_hello, unique_product_title])
-    name = serializers.CharField(source='title', read_only=True)
+    # name = serializers.CharField(source='title', read_only=True)
     class Meta:
         model = Product
         fields = [
+            #'user',
             'url',
             'edit_url', ## viewset
-            'email',
+            # 'email',
             'pk',
             'title',
-            'name',
+            #'name',
             'content',
             'price',
             'sale_price',
             'my_discount',
         ]
 
-    def validate_title(self, value): # title은 이전에 입력된 값
-        request = self.context.get('request')
-        user = request.user
-        qs = Product.objects.filter(user=user, title__exact=value) # exact 정확히 일치하는 데이터 찾기, iexact 대소문자 구분하지 않고 정확히 일치하는 값 찾기
-        if qs.exists():
-            raise serializers.ValidationError(f"{value} is already a product name.")
-        return value
+    # def validate_title(self, value): # title은 이전에 입력된 값
+    #     request = self.context.get('request')
+    #     user = request.user
+    #     qs = Product.objects.filter(user=user, title__exact=value) # exact 정확히 일치하는 데이터 찾기, iexact 대소문자 구분하지 않고 정확히 일치하는 값 찾기
+    #     if qs.exists():
+    #         raise serializers.ValidationError(f"{value} is already a product name.")
+    #     return value
     # def create(self, validated_data):
     #     # return Product.objects.create(**validated_data)
     #     email = validated_data.pop('email')

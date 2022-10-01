@@ -4,18 +4,19 @@ from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
 
-from api.mixins import StaffEditorPermissionMixin
+from api.mixins import StaffEditorPermissionMixin, UserQuerysetMixin
 from api.permissions import IsStaffEditorPermission
 from .models import Product
 from .serializers import ProductSerializers
 
 
 class ProductListCreateAPIView(
+    UserQuerysetMixin,
     StaffEditorPermissionMixin,
     generics.ListCreateAPIView): # 리스트를 보여주고 만들 수 있는 class
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
-
+    uesr = 'user'
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # email = serializer.validated_data.pop('email') # 실제로 저장하진 않지만 입력하는 값을 가져올 수 있음
@@ -23,10 +24,18 @@ class ProductListCreateAPIView(
         content = serializer.validated_data.get('content')
         if content is None:
             content = title
-        serializer.save(content=content) ## form.save() model.save()와 같다.
+        serializer.save(user=self.request.user, content=content) ## form.save() model.save()와 같다.
 
+    # def get_queryset(self, *args, **kwargs):
+    #     qs = super().get_queryset(*args, **kwargs) # product의 list를 반환함
+    #     request = self.request
+    #     user = request.user
+    #     if not user.is_authenticated:
+    #         return Product.objects.none()
+    #     return qs.filter(user=request.user)
 
 class ProductDetailAPIView(
+    UserQuerysetMixin,
     StaffEditorPermissionMixin,
     generics.RetrieveAPIView):
     queryset = Product.objects.all()
@@ -35,6 +44,7 @@ class ProductDetailAPIView(
 
 
 class ProductUpdateAPIView(
+    UserQuerysetMixin,
     StaffEditorPermissionMixin,
     generics.UpdateAPIView):
     queryset = Product.objects.all()
@@ -48,6 +58,7 @@ class ProductUpdateAPIView(
 
 
 class ProductDestroyAPIView(
+    UserQuerysetMixin,
     StaffEditorPermissionMixin,
     generics.DestroyAPIView):
     queryset = Product.objects.all()
@@ -58,30 +69,30 @@ class ProductDestroyAPIView(
         super().perform_destroy(instance)
 
 
-# class ProductMixinView(mixins.CreateModelMixin, mixins.ListModelMixin, # 혼합 class view
-#                        mixins.RetrieveModelMixin, generics.GenericAPIView):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializers
-#     lookup_field = 'pk'
-#     permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
-#
-#     def get(self, request, *args, **kwargs): # get 메소드일때
-#         # print(args, kwargs) ## () {'pk': 10}
-#         pk = kwargs.get('pk')
-#         if pk is not None: # pk 값이 넘어왔다면 detail로 넘겨줌
-#             return self.retrieve(request, *args, **kwargs)
-#         return self.list(request, *args, **kwargs)
-#
-#     def post(self, request, *args, **kwargs):
-#         return self.create(request, *args, **kwargs)
-#
-#     def perform_create(self, serializer):
-#         # serializer.save(user=self.request.user)
-#         title = serializer.validated_data.get('title')
-#         content = serializer.validated_data.get('content')
-#         if content is None:
-#             content = title
-#         serializer.save(content=content)
+class ProductMixinView(mixins.CreateModelMixin, mixins.ListModelMixin, # 혼합 class view
+                       mixins.RetrieveModelMixin, generics.GenericAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializers
+    lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+
+    def get(self, request, *args, **kwargs): # get 메소드일때
+        # print(args, kwargs) ## () {'pk': 10}
+        pk = kwargs.get('pk')
+        if pk is not None: # pk 값이 넘어왔다면 detail로 넘겨줌
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        # serializer.save(user=self.request.user)
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content')
+        if content is None:
+            content = title
+        serializer.save(content=content)
 
 
 # @api_view(['GET', 'POST'])
