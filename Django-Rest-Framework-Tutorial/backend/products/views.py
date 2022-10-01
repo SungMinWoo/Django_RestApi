@@ -16,12 +16,12 @@ class ProductListCreateAPIView(
     generics.ListCreateAPIView): # 리스트를 보여주고 만들 수 있는 class
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
-    uesr = 'user'
+    allow_staff_view = False
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
         # email = serializer.validated_data.pop('email') # 실제로 저장하진 않지만 입력하는 값을 가져올 수 있음
         title = serializer.validated_data.get('title')
-        content = serializer.validated_data.get('content')
+        content = serializer.validated_data.get('content') or None
         if content is None:
             content = title
         serializer.save(user=self.request.user, content=content) ## form.save() model.save()와 같다.
