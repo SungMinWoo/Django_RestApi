@@ -13,7 +13,7 @@ class ProductQuerySet(models.QuerySet):
         qs = self.is_public().filter(lookup)
         if user is not None:
             qs2 = self.filter(user=user).filter(lookup)
-            qs = (qs | qs2).distinct() # 중복 제거
+            qs = (qs | qs2).distinct() # or 연산으로 만족하는 값 리턴 둘 중 중복 제거
         return qs
 
 
@@ -34,6 +34,23 @@ class Product(models.Model):
     public = models.BooleanField(default=True)
 
     objects = ProductManager() ## 호출할 수 있게
+
+
+    def get_absolute_url(self):
+        return f'/api/articles/{self.pk}/'
+
+    @property
+    def endpoint(self):
+        return self.get_absolute_url()
+
+    @property
+    def path(self):
+        return f'/products/{self.pk}/'
+
+    @property
+    def body(self):
+        return self.content
+
     @property
     def sale_price(self):
         return "%.2f" % (float(self.price) * 0.8)
