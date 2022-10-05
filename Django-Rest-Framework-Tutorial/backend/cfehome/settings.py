@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import datetime
 from .secret_key import DJANGO_SECRET_KEY
 from pathlib import Path
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'api',
     'products',
     'search',
@@ -140,11 +142,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication', # 패키지.모듈.클래스
-        'api.authentication.TokenAuthentication' # custom authentication
+        'api.authentication.TokenAuthentication', # custom authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly' # GET 요청 모든 유저
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination', # or PageNumberPagination
     'PAGE_SIZE': 3
+}
+
+SIMPLE_JWT={
+    "AUTH_HEADER_TYPES":['Bearer'],
+    "ACCESS_TOKEN_LIKETIME": datetime.timedelta(seconds=30), # hours=3
+    "REFRESH_TOKEN_LIKETIME": datetime.timedelta(minutes=1), # days=1
 }
