@@ -1,10 +1,14 @@
 const contentContainer = document.getElementById('content-container')
 const loginForm = document.getElementById('login-form')
+const searchForm = document.getElementById('search-form')
 const baseEndpoint = 'http://localhost:8000/api'
 /* const는 변하지 않는 변수에 사용함, var은 변경될 수 있는 상수수*/
 if (loginForm){
     //handle login form
     loginForm.addEventListener('submit', handleLogin)
+}
+if (searchForm){
+    searchForm.addEventListener('submit', handleSearch)
 }
 
 function handleLogin(event){
@@ -31,6 +35,51 @@ function handleLogin(event){
         console.log('err', err)
     })
 }
+
+function handleSearch(event){
+    event.preventDefault()
+    let formData = new FormData(searchForm)
+    let data = Object.fromEntries(formData)
+    let searchParams = new URLSearchParams(data)
+    const endpoint = `${baseEndpoint}/search/?${searchParams}`
+    const headers = {
+        "Content-Type": "application/json",
+    }
+    const authToken = localStorage.getItem('access')
+    if (authToken){
+        headers['Authorization'] = `Bearer ${authToken}`
+    }
+    const options = {
+        method: "GET",
+        headers: headers
+    }
+    fetch(endpoint, options) // 실행, requests.get
+    .then(response=>{
+        return response.json()
+    })
+    .then(data => {
+        const validData = isTokenNotValid(data)
+        if (validData && contentContainer){
+            contentContainer.innerHTML = ""
+            if (data) {
+                let htmlStr  = ""
+                for (let result of data.results) {
+                    htmlStr += "<li>"+ result.title + "</li>"
+                }
+                contentContainer.innerHTML = htmlStr
+                if (data.results.length === 0) {
+                    contentContainer.innerHTML = "<p>No results found</p>"
+                }
+            } else {
+                contentContainer.innerHTML = "<p>No results found</p>"
+            }
+        }
+    })
+    .catch(err=>{
+        console.log('err', err)
+    })
+}
+
 
 function handleAuthData(authData, callback){ // 사용자 스토리지에 jwt 추가
     localStorage.setItem('access', authData.access)
